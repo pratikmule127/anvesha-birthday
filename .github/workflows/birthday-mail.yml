@@ -1,35 +1,83 @@
-name: Birthday Mail
+import os
+from datetime import date
 
-on:
-  schedule:
-    - cron: "30 18 * * *"  # 11:30 PM UTC = 5:00 AM IST daily check
-  workflow_dispatch: # manual trigger bhi possible
+# Paths
+letters_folder = "letters"
+year = date.today().year
+letter_file = f"{letters_folder}/{year}.html"
 
-jobs:
-  send-birthday-mail:
-    runs-on: ubuntu-latest
+# Create letters folder if not exists
+os.makedirs(letters_folder, exist_ok=True)
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+# Auto-generate letter if not exists
+if not os.path.isfile(letter_file):
+    content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{year}</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="center">
+    <h2 class="slow">🌙 {year}</h2>
+    <p class="fade">
+      Some moments do not ask for attention.
+    </p>
+    <p class="fade delay">
+      They arrive quietly,<br>
+      and stay longer than expected.
+    </p>
+    <p class="fade delay">
+      May this year be gentle with you.
+    </p>
+    <p class="tiny">
+      — Someone who noticed
+    </p>
+  </div>
+</body>
+</html>"""
+    with open(letter_file, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Letter for {year} created automatically.")
+else:
+    print(f"Letter for {year} already exists.")
 
-      - name: Install Python
-        run: sudo apt-get update && sudo apt-get install -y python3
+# Email part (existing code)
+import smtplib, os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-      - name: Check birthday & send mail
-        env:
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          BIRTHDAY_DAY: "05"   # recipient ka day
-          BIRTHDAY_MONTH: "03" # recipient ka month
-        run: |
-          TODAY_DAY=$(date +%d)
-          TODAY_MONTH=$(date +%m)
+EMAIL_USER = os.environ["EMAIL_USER"]
+EMAIL_PASS = os.environ["EMAIL_PASS"]
+TO_EMAIL   = os.environ["TO_EMAIL"]
 
-          if [ "$TODAY_DAY" = "$BIRTHDAY_DAY" ] && [ "$TODAY_MONTH" = "$BIRTHDAY_MONTH" ]; then
-            echo "🎂 Birthday detected. Sending email..."
-            python3 send_birthday_mail.py
-          else
-            echo "⏳ Not birthday today."
-          fi
+link = f"https://pratikmule127.github.io/anvesha-birthday/letters/{year}.html"
+
+subject = "🌙 Today feels different…"
+
+body = f"""
+किञ्चित् अपि प्रतीक्षते… 🌙
+
+Some days arrive quietly,
+yet stay longer than expected.
+
+Open it when you feel ready:
+{link}
+
+— PD
+"""
+
+msg = MIMEMultipart()
+msg["From"] = EMAIL_USER
+msg["To"] = TO_EMAIL
+msg["Subject"] = subject
+msg.attach(MIMEText(body, "plain", "utf-8"))
+
+server = smtplib.SMTP("smtp.gmail.com", 587)
+server.starttls()
+server.login(EMAIL_USER, EMAIL_PASS)
+server.send_message(msg)
+server.quit()
+
+print("✅ Birthday mail sent")
