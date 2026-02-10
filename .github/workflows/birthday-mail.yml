@@ -2,8 +2,9 @@ name: Birthday Mail
 
 on:
   schedule:
-    - cron: "30 18 * * *"  # Daily 11:30 PM UTC = 5:00 AM IST
-  workflow_dispatch:       # Manual trigger possible
+    # 30 18 UTC = 11:30 PM UTC = 5:00 AM IST
+    - cron: "30 18 * * *"
+  workflow_dispatch:
 
 jobs:
   send-birthday-mail:
@@ -14,21 +15,28 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Python
-        run: sudo apt-get update && sudo apt-get install -y python3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3
 
       - name: Check birthday & send mail
+        shell: bash
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          BIRTHDAY_DAY: "05"    # Recipient ka day
-          BIRTHDAY_MONTH: "03"  # Recipient ka month
+          BIRTHDAY_DAY: "05"
+          BIRTHDAY_MONTH: "03"
         run: |
           TODAY_DAY=$(date +%d)
           TODAY_MONTH=$(date +%m)
+
+          echo "Today: $TODAY_DAY-$TODAY_MONTH"
+          echo "Birthday: $BIRTHDAY_DAY-$BIRTHDAY_MONTH"
 
           if [ "$TODAY_DAY" = "$BIRTHDAY_DAY" ] && [ "$TODAY_MONTH" = "$BIRTHDAY_MONTH" ]; then
             echo "🎂 Birthday detected. Sending email..."
             python3 send_birthday_mail.py
           else
             echo "⏳ Not birthday today."
+          fi
