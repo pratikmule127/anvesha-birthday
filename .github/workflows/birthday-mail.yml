@@ -21,14 +21,13 @@ jobs:
         run: |
           BDAY_DAY=12
           BDAY_MONTH=7
-
           TODAY_DAY=$(date +%d)
           TODAY_MONTH=$(date +%m)
 
           if [ "$TODAY_DAY" = "$BDAY_DAY" ] && [ "$TODAY_MONTH" = "$BDAY_MONTH" ]; then
             echo "🎂 Birthday detected. Sending email..."
 
-            python3 - <<EOF
+            python3 <<'EOF'
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -59,6 +58,7 @@ server.login("${EMAIL_USER}", "${EMAIL_PASS}")
 server.send_message(msg)
 server.quit()
 EOF
+
           else
             echo "Not birthday today."
           fi
