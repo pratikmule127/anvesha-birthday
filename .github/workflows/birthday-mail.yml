@@ -1,34 +1,19 @@
-name: Birthday Mail
+- name: Check birthday & send mail
+  env:
+    EMAIL_USER: ${{ secrets.EMAIL_USER }}
+    EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+    TO_EMAIL: ${{ secrets.TO_EMAIL }}
+  run: |
+    BDAY_DAY=05
+    BDAY_MONTH=03
 
-on:
-  schedule:
-    - cron: "30 18 * * *"   # 12:00 AM IST
-  workflow_dispatch:
+    TODAY_DAY=$(date +%d)
+    TODAY_MONTH=$(date +%m)
 
-jobs:
-  send-birthday-mail:
-    runs-on: ubuntu-latest
+    if [ "$TODAY_DAY" = "$BDAY_DAY" ] && [ "$TODAY_MONTH" = "$BDAY_MONTH" ]; then
+      echo "🎂 Birthday detected. Sending email..."
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Check birthday & send mail
-        env:
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          TO_EMAIL: ${{ secrets.TO_EMAIL }}
-        run: |
-          BDAY_DAY=05
-          BDAY_MONTH=03
-
-          TODAY_DAY=$(date +%d)
-          TODAY_MONTH=$(date +%m)
-
-          if [ "$TODAY_DAY" = "$BDAY_DAY" ] && [ "$TODAY_MONTH" = "$BDAY_MONTH" ]; then
-            echo "🎂 Birthday detected. Sending email..."
-
-            python3 <<EOF
+      python3 << 'EOF'
 import smtplib, os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -66,6 +51,6 @@ server.quit()
 print("✅ Birthday mail sent")
 EOF
 
-          else
-            echo "⏳ Not birthday today."
-          fi
+    else
+      echo "⏳ Not birthday today."
+    fi
