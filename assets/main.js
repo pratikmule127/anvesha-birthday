@@ -4,8 +4,8 @@ const day = today.getDate();
 const month = today.getMonth() + 1;
 
 // 🎂 CHANGE HERE
-const BDAY_DAY = 12;
-const BDAY_MONTH = 7;
+const BDAY_DAY = 5;
+const BDAY_MONTH = 3;
 
 const isBirthday = (day === BDAY_DAY && month === BDAY_MONTH);
 
