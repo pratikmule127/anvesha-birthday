@@ -1,21 +1,26 @@
 import smtplib, os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import date
 
 EMAIL_USER = os.environ["EMAIL_USER"]
 EMAIL_PASS = os.environ["EMAIL_PASS"]
 TO_EMAIL   = os.environ["TO_EMAIL"]
 
+# Dynamic year & link
+year = date.today().year
+link = f"https://pratikmule127.github.io/anvesha-birthday/letters/{year}.html"
+
 subject = "🌙 Today feels different…"
 
-body = """
+body = f"""
 किञ्चित् अपि प्रतीक्षते… 🌙
 
 Some days arrive quietly,
 yet stay longer than expected.
 
 Open it when you feel ready:
-https://pratikmule127.github.io/anvesha-birthday/
+{link}
 
 — PD
 """
