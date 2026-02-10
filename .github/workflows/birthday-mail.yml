@@ -2,7 +2,7 @@ name: Birthday Mail
 
 on:
   schedule:
-    - cron: "30 18 * * *"  # 11:00 PM UTC = 5:30 AM IST next day
+    - cron: "30 18 * * *"  # 11:30 PM UTC = 5:00 AM IST
   workflow_dispatch:
 
 jobs:
@@ -13,59 +13,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Install Python
+        run: sudo apt-get update && sudo apt-get install -y python3
+
       - name: Check birthday & send mail
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
         run: |
-          BDAY_DAY=05
-          BDAY_MONTH=03
-
           TODAY_DAY=$(date +%d)
           TODAY_MONTH=$(date +%m)
 
-          if [ "$TODAY_DAY" = "$BDAY_DAY" ] && [ "$TODAY_MONTH" = "$BDAY_MONTH" ]; then
+          if [ "$TODAY_DAY" = "05" ] && [ "$TODAY_MONTH" = "03" ]; then
             echo "🎂 Birthday detected. Sending email..."
-
-            python3 << 'EOF'
-import smtplib, os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-EMAIL_USER = os.environ["EMAIL_USER"]
-EMAIL_PASS = os.environ["EMAIL_PASS"]
-TO_EMAIL   = os.environ["TO_EMAIL"]
-
-subject = "🌙 Today feels different…"
-
-body = """
-किञ्चित् अपि प्रतीक्षते… 🌙
-
-Some days arrive quietly,
-yet stay longer than expected.
-
-Open it when you feel ready:
-https://pratikmule127.github.io/anvesha-birthday/
-
-— PD
-"""
-
-msg = MIMEMultipart()
-msg["From"] = EMAIL_USER
-msg["To"] = TO_EMAIL
-msg["Subject"] = subject
-msg.attach(MIMEText(body, "plain", "utf-8"))
-
-server = smtplib.SMTP("smtp.gmail.com", 587)
-server.starttls()
-server.login(EMAIL_USER, EMAIL_PASS)
-server.send_message(msg)
-server.quit()
-
-print("✅ Birthday mail sent")
-EOF
-
+            python3 send_birthday_mail.py
           else
             echo "⏳ Not birthday today."
           fi
