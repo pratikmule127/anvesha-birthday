@@ -36,7 +36,7 @@ jobs:
 
           if [ "$TODAY_DAY" = "$BIRTHDAY_DAY" ] && [ "$TODAY_MONTH" = "$BIRTHDAY_MONTH" ]; then
             echo "🎂 Birthday detected. Sending email..."
-            python3 send_birthday_mail.py
+            python3 .github/workflows/send_birthday_mail.py
           else
             echo "⏳ Not birthday today."
           fi
